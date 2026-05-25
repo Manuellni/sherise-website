@@ -297,43 +297,35 @@
   .prod-card {
     background: var(--white); border-radius: 20px;
     overflow: hidden; transition: transform 0.25s, box-shadow 0.25s;
-    display: flex; flex-direction: column;
   }
   .prod-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
   .prod-img {
-    height: 220px; display: flex; align-items: center; justify-content: center;
-    font-size: 3.5rem; position: relative; overflow: hidden;
-  }
-  .prod-img img {
-    width: 100%; height: 100%; object-fit: cover;
-    position: absolute; inset: 0;
-  }
-  .prod-img .prod-emoji {
-    position: relative; z-index: 1; font-size: 3.5rem;
+    height: 180px; display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem; position: relative;
   }
   .prod-img.c1 { background: linear-gradient(135deg, #F5ECF8, #DDB8EE); }
   .prod-img.c2 { background: linear-gradient(135deg, #E0F0EA, #A3D9C4); }
   .prod-img.c3 { background: linear-gradient(135deg, #FEF1E2, #F5CC80); }
   .prod-badge {
-    position: absolute; top: 1rem; right: 1rem; z-index: 2;
+    position: absolute; top: 1rem; right: 1rem;
     background: var(--rose); color: var(--white);
     border-radius: 40px; font-size: 0.7rem; font-weight: 700;
     padding: 0.25rem 0.7rem; letter-spacing: 0.5px;
   }
-  .prod-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+  .prod-body { padding: 1.5rem; }
   .prod-cat { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 0.5rem; }
   .prod-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; color: var(--deep); margin-bottom: 0.5rem; }
-  .prod-desc { font-size: 0.87rem; line-height: 1.6; color: var(--muted); margin-bottom: 1.2rem; flex: 1; }
-  .prod-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+  .prod-desc { font-size: 0.87rem; line-height: 1.6; color: var(--muted); margin-bottom: 1.2rem; }
+  .prod-footer { display: flex; align-items: center; justify-content: space-between; }
   .prod-price { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--deep); }
-  .btn-shop {
+  .prod-price span { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+  .btn-buy {
     background: var(--plum); color: var(--white);
     border: none; border-radius: 40px; padding: 0.6rem 1.3rem;
     font-size: 0.88rem; font-weight: 600; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; transition: all 0.2s;
-    text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: 'DM Sans', sans-serif; transition: background 0.2s;
   }
-  .btn-shop:hover { background: var(--rose); transform: scale(1.03); }
+  .btn-buy:hover { background: var(--rose); }
 
   /* ── TESTIMONIALS ── */
   .test-bg { background: var(--white); }
@@ -627,49 +619,38 @@
     </div>
     <div class="products-grid">
       <div class="prod-card">
-        <div class="prod-img c1">
-          <img id="img-prod-1" src="" alt="" style="display:none;"/>
-          <span class="prod-emoji" id="emoji-prod-1">🌸</span>
-          <span class="prod-badge">Best Seller</span>
-        </div>
+        <div class="prod-img c1">🌸<span class="prod-badge">Best Seller</span></div>
         <div class="prod-body">
           <div class="prod-cat">Health & Nutrition</div>
           <div class="prod-name">Hormone Balance Bundle</div>
           <div class="prod-desc">A monthly supplement pack scientifically formulated to support female hormone cycles, reduce PMS, and boost energy naturally.</div>
           <div class="prod-footer">
-            <div class="prod-price">$49</div>
-            <a class="btn-shop" href="#" target="_blank" rel="noopener" id="link-prod-1">Shop Now ↗</a>
+            <div class="prod-price">$49<span>/month</span></div>
+            <button class="btn-buy" onclick="addToCart('Hormone Balance Bundle')">Add to Cart</button>
           </div>
         </div>
       </div>
       <div class="prod-card">
-        <div class="prod-img c2">
-          <img id="img-prod-2" src="" alt="" style="display:none;"/>
-          <span class="prod-emoji" id="emoji-prod-2">🧘‍♀️</span>
-          <span class="prod-badge">New</span>
-        </div>
+        <div class="prod-img c2">🧘‍♀️<span class="prod-badge">New</span></div>
         <div class="prod-body">
           <div class="prod-cat">Mental Health & Mindset</div>
           <div class="prod-name">Calm & Clarity Program</div>
           <div class="prod-desc">A 30-day guided mindset program — daily audio, journal prompts, and stress-reduction techniques proven to rewire anxious patterns.</div>
           <div class="prod-footer">
-            <div class="prod-price">$39</div>
-            <a class="btn-shop" href="#" target="_blank" rel="noopener" id="link-prod-2">Shop Now ↗</a>
+            <div class="prod-price">$39<span>/one-time</span></div>
+            <button class="btn-buy" onclick="addToCart('Calm & Clarity Program')">Add to Cart</button>
           </div>
         </div>
       </div>
       <div class="prod-card">
-        <div class="prod-img c3">
-          <img id="img-prod-3" src="" alt="" style="display:none;"/>
-          <span class="prod-emoji" id="emoji-prod-3">🏋️‍♀️</span>
-        </div>
+        <div class="prod-img c3">🏋️‍♀️</div>
         <div class="prod-body">
           <div class="prod-cat">Strength & Fitness</div>
           <div class="prod-name">Cycle-Sync Training Kit</div>
           <div class="prod-desc">12-week training guide built around your menstrual cycle, plus resistance bands and a performance protein blend for women.</div>
           <div class="prod-footer">
-            <div class="prod-price">$74</div>
-            <a class="btn-shop" href="#" target="_blank" rel="noopener" id="link-prod-3">Shop Now ↗</a>
+            <div class="prod-price">$74<span>/kit</span></div>
+            <button class="btn-buy" onclick="addToCart('Cycle-Sync Training Kit')">Add to Cart</button>
           </div>
         </div>
       </div>
@@ -792,8 +773,21 @@
   </div>
 </footer>
 
+<!-- CART TOAST -->
+<div id="cart-toast" style="
+  position:fixed; bottom:2rem; right:2rem; z-index:999;
+  background:var(--deep); color:var(--white);
+  border:1px solid rgba(201,146,42,0.4); border-radius:14px;
+  padding:1rem 1.5rem; font-size:0.9rem; font-weight:500;
+  transform:translateY(120px); opacity:0;
+  transition:all 0.3s ease; max-width:280px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+">
+  <span id="toast-text">✓ Added to cart!</span>
+</div>
+
 <script>
-  // ── STEP INTERACTION ──
+  // Step interaction
   function activateStep(el, idx) {
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
@@ -801,7 +795,7 @@
     document.getElementById('vis-label').textContent = labels[idx];
   }
 
-  // ── EMAIL SUBSCRIBE ──
+  // Email subscribe
   function handleSubscribe() {
     const email = document.getElementById('email-input').value.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -810,49 +804,29 @@
       setTimeout(() => document.getElementById('email-input').style.borderColor = 'rgba(255,255,255,0.25)', 1500);
       return;
     }
-    document.querySelector('.email-form').style.display = 'none';
+   document.querySelector('.email-form').style.display = 'none';
     document.getElementById('success-msg').style.display = 'block';
-    // In production: POST to sherise_backend.php?action=subscribe
-    console.log('New subscriber:', email);
+    fetch('https://sherise.infinityfreeapp.com/sherise_backend.php?action=subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'Landing Page' })
+    });
+
+  // Add to cart
+  function addToCart(name) {
+    const toast = document.getElementById('cart-toast');
+    document.getElementById('toast-text').textContent = '✓ ' + name + ' added!';
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+    setTimeout(() => {
+      toast.style.transform = 'translateY(120px)';
+      toast.style.opacity = '0';
+    }, 3000);
+    // In production: POST to your cart API / MySQL here
+    console.log('Cart item (send to MySQL):', name);
   }
 
-  // ── PRODUCT IMAGE HELPER ──
-  function setProductImage(num, src) {
-    const img   = document.getElementById('img-prod-' + num);
-    const emoji = document.getElementById('emoji-prod-' + num);
-    if (!img) return;
-    if (src) {
-      img.src = src; img.alt = 'Product ' + num;
-      img.style.display = 'block';
-      if (emoji) emoji.style.display = 'none';
-    } else {
-      img.style.display = 'none';
-      if (emoji) emoji.style.display = 'block';
-    }
-  }
-
-  // ── PRODUCT LINK HELPER ──
-  function setProductLink(num, url) {
-    const link = document.getElementById('link-prod-' + num);
-    if (link && url) link.href = url;
-  }
-
-  // ── LOAD SAVED PRODUCT DATA (written by admin dashboard) ──
-  function loadProductData() {
-    for (let i = 1; i <= 3; i++) {
-      try {
-        const saved = localStorage.getItem('sherise_product_' + i);
-        if (saved) {
-          const d = JSON.parse(saved);
-          if (d.image) setProductImage(i, d.image);
-          if (d.link)  setProductLink(i, d.link);
-        }
-      } catch(e) {}
-    }
-  }
-  loadProductData();
-
-  // ── SCROLL REVEAL ──
+  // Scroll reveal
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
