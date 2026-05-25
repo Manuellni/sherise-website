@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SheRise — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --plum:#3C1A5E; --deep:#1E0A35; --gold:#C9922A; --gold-lt:#F0C97A;
+  --rose:#A63060; --rose-lt:#E8789F; --teal:#0F6E56; --teal-lt:#5DCAA5;
+  --cream:#FAF5EF; --white:#FFFFFF; --muted:#6B5E7A;
+  --sidebar-w: 260px;
+  --success:#1D9E75; --danger:#D85A30; --warn:#BA7517;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#F0EBF5;color:var(--deep);display:flex;min-height:100vh;}
+
+/* ── LOGIN OVERLAY ── */
+#login-overlay{
+  position:fixed;inset:0;background:linear-gradient(135deg,var(--deep),var(--plum));
+  display:flex;align-items:center;justify-content:center;z-index:9999;
+}
+.login-box{
+  background:var(--white);border-radius:20px;padding:3rem 2.5rem;
+  width:100%;max-width:400px;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,0.3);
+}
+.login-logo{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--plum);margin-bottom:0.3rem;}
+.login-logo span{color:var(--rose);}
+.login-sub{font-size:0.85rem;color:var(--muted);margin-bottom:2rem;}
+.login-box input{
+  width:100%;padding:0.85rem 1.2rem;border:1.5px solid #DDD;border-radius:10px;
+  font-size:0.95rem;font-family:'DM Sans',sans-serif;margin-bottom:1rem;outline:none;
+  transition:border-color 0.2s;
+}
+.login-box input:focus{border-color:var(--plum);}
+.login-btn{
+  width:100%;padding:0.9rem;background:var(--plum);color:var(--white);
+  border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:background 0.2s;
+}
+.login-btn:hover{background:var(--rose);}
+.login-err{color:var(--danger);font-size:0.85rem;margin-top:0.5rem;display:none;}
+.login-hint{font-size:0.78rem;color:var(--muted);margin-top:1.2rem;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);background:var(--deep);
+  position:fixed;top:0;left:0;bottom:0;
+  display:flex;flex-direction:column;z-index:100;
+}
+.sb-logo{
+  padding:1.8rem 1.5rem 1.5rem;
+  font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;
+  color:var(--gold-lt);border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.sb-logo span{color:var(--rose-lt);}
+.sb-label{
+  padding:1.2rem 1.5rem 0.5rem;
+  font-size:0.65rem;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:rgba(255,255,255,0.3);
+}
+.sb-nav{list-style:none;padding:0 0.8rem;}
+.sb-nav li a{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.75rem 0.8rem;border-radius:10px;
+  text-decoration:none;color:rgba(255,255,255,0.6);
+  font-size:0.9rem;font-weight:500;transition:all 0.2s;
+}
+.sb-nav li a:hover{background:rgba(255,255,255,0.07);color:var(--white);}
+.sb-nav li a.active{background:rgba(201,146,42,0.18);color:var(--gold-lt);}
+.sb-nav li a .icon{font-size:1.1rem;width:20px;text-align:center;}
+.sb-bottom{margin-top:auto;padding:1.5rem;border-top:1px solid rgba(255,255,255,0.08);}
+.sb-user{display:flex;align-items:center;gap:0.75rem;}
+.sb-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--rose);display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:0.85rem;color:var(--white);flex-shrink:0;
+}
+.sb-name{font-size:0.88rem;color:var(--white);font-weight:500;}
+.sb-role{font-size:0.75rem;color:rgba(255,255,255,0.4);}
+.sb-logout{
+  margin-top:1rem;width:100%;padding:0.6rem;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;color:rgba(255,255,255,0.5);font-size:0.82rem;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;
+}
+.sb-logout:hover{background:rgba(214,90,48,0.2);color:#F09575;}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{
+  background:var(--white);padding:1rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid #EDE8F5;position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-size:1.1rem;font-weight:600;color:var(--deep);}
+.topbar-right{display:flex;align-items:center;gap:1rem;}
+.topbar-badge{
+  background:var(--rose);color:var(--white);border-radius:40px;
+  padding:0.3rem 0.9rem;font-size:0.78rem;font-weight:700;
+}
+.content{padding:2rem;flex:1;}
+
+/* ── PANELS ── */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-bottom:2rem;}
+.stat-card{
+  background:var(--white);border-radius:14px;padding:1.5rem;
+  border:1px solid #EDE8F5;
+}
+.stat-card .s-label{font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:0.6rem;}
+.stat-card .s-val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--deep);}
+.stat-card .s-change{font-size:0.8rem;margin-top:0.3rem;}
+.s-up{color:var(--success);} .s-down{color:var(--danger);}
+.stat-card .s-icon{float:right;font-size:1.8rem;opacity:0.3;}
+
+/* ── SECTION TITLE ── */
+.sec-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--deep);margin-bottom:1.2rem;}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--white);border-radius:14px;border:1px solid #EDE8F5;overflow:hidden;margin-bottom:2rem;}
+.table-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.2rem 1.5rem;border-bottom:1px solid #EDE8F5;
+}
+.table-head h3{font-size:1rem;font-weight:600;}
+.tbl-btn{
+  padding:0.45rem 1rem;border-radius:8px;font-size:0.82rem;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;
+}
+.tbl-btn-outline{background:transparent;border:1.5px solid var(--plum);color:var(--plum);}
+.tbl-btn-outline:hover{background:var(--plum);color:var(--white);}
+.tbl-btn-solid{background:var(--plum);border:none;color:var(--white);}
+.tbl-btn-solid:hover{background:var(--rose);}
+table{width:100%;border-collapse:collapse;}
+th{
+  padding:0.8rem 1.5rem;text-align:left;
+  font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;
+  color:var(--muted);background:#F8F5FC;border-bottom:1px solid #EDE8F5;
+}
+td{padding:1rem 1.5rem;font-size:0.88rem;border-bottom:1px solid #F0EBF5;color:var(--deep);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAF7FC;}
+.badge{
+  display:inline-block;padding:0.25rem 0.7rem;border-radius:40px;
+  font-size:0.72rem;font-weight:700;
+}
+.badge-green{background:#E1F5EE;color:#0F6E56;}
+.badge-rose{background:#FCE8EE;color:#A63060;}
+.badge-gold{background:#FEF1DC;color:#BA7517;}
+.badge-gray{background:#F1EFE8;color:#5F5E5A;}
+.action-btn{
+  background:none;border:none;cursor:pointer;font-size:1rem;
+  padding:0.2rem 0.4rem;border-radius:6px;transition:background 0.15s;
+}
+.action-btn:hover{background:#F0EBF5;}
+
+/* ── EDITOR ── */
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.editor-card{background:var(--white);border-radius:14px;border:1px solid #EDE8F5;padding:1.5rem;}
+.editor-card h3{font-size:1rem;font-weight:600;margin-bottom:1.2rem;color:var(--deep);padding-bottom:0.8rem;border-bottom:1px solid #EDE8F5;}
+.field-group{margin-bottom:1rem;}
+.field-group label{display:block;font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.5px;}
+.field-group input,
+.field-group textarea,
+.field-group select{
+  width:100%;padding:0.7rem 1rem;
+  border:1.5px solid #DDD;border-radius:8px;
+  font-size:0.9rem;font-family:'DM Sans',sans-serif;
+  color:var(--deep);outline:none;transition:border-color 0.2s;resize:vertical;
+}
+.field-group input:focus,
+.field-group textarea:focus,
+.field-group select:focus{border-color:var(--plum);}
+.field-group textarea{min-height:80px;}
+.save-btn{
+  background:var(--plum);color:var(--white);border:none;
+  border-radius:8px;padding:0.7rem 1.5rem;font-size:0.9rem;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.2s;
+  margin-top:0.5rem;
+}
+.save-btn:hover{background:var(--rose);}
+.save-toast{
+  display:inline-block;margin-left:1rem;font-size:0.82rem;
+  color:var(--success);font-weight:600;opacity:0;transition:opacity 0.3s;
+}
+
+/* ── PRODUCT EDITOR ── */
+.prod-editor-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1rem;}
+
+/* ── SETTINGS ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:0.8rem 0;border-bottom:1px solid #F0EBF5;}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:0.9rem;color:var(--deep);}
+.toggle-sub{font-size:0.78rem;color:var(--muted);}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.slider-t{
+  position:absolute;inset:0;background:#CCC;border-radius:40px;cursor:pointer;transition:0.2s;
+}
+.slider-t::before{
+  content:'';position:absolute;left:3px;top:3px;
+  width:18px;height:18px;border-radius:50%;background:white;transition:0.2s;
+}
+.toggle input:checked + .slider-t{background:var(--plum);}
+.toggle input:checked + .slider-t::before{transform:translateX(20px);}
+
+/* ── CHART SIMPLE ── */
+.mini-chart{display:flex;align-items:flex-end;gap:6px;height:60px;margin-top:1rem;}
+.bar{
+  flex:1;border-radius:4px 4px 0 0;
+  background:linear-gradient(to top,var(--plum),var(--rose-lt));
+  transition:height 0.4s;
+}
+
+/* ── MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;
+  display:none;align-items:flex-start;justify-content:center;
+  overflow-y:auto;padding:2rem 1rem;
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--white);border-radius:16px;padding:2rem;
+  width:100%;max-width:520px;position:relative;
+  margin:auto;
+}
+.modal h3{font-size:1.1rem;font-weight:700;margin-bottom:1.2rem;color:var(--deep);}
+.modal-close{
+  position:absolute;top:1rem;right:1rem;background:none;border:none;
+  font-size:1.3rem;cursor:pointer;color:var(--muted);
+}
+.modal-footer{display:flex;gap:0.8rem;margin-top:1.5rem;justify-content:flex-end;}
+.btn-cancel{background:#F0EBF5;color:var(--plum);border:none;border-radius:8px;padding:0.65rem 1.2rem;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-confirm{background:var(--plum);color:white;border:none;border-radius:8px;padding:0.65rem 1.4rem;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-confirm:hover{background:var(--rose);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">She<span>Rise</span></div>
+    <div class="login-sub">Admin Dashboard — Secure Access</div>
+    <input type="text" id="login-user" placeholder="Username" />
+    <input type="password" id="login-pass" placeholder="Password" />
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err">Invalid credentials. Try again.</div>
+    <div class="login-hint">Demo: admin / sherise2025</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">She<span>Rise</span> <span style="font-size:0.7rem;color:rgba(255,255,255,0.3);font-family:'DM Sans',sans-serif;font-weight:400;">Admin</span></div>
+
+  <div class="sb-label">Overview</div>
+  <ul class="sb-nav">
+    <li><a href="#" class="active" onclick="showPanel('dashboard',this)"><span class="icon">📊</span> Dashboard</a></li>
+    <li><a href="#" onclick="showPanel('subscribers',this)"><span class="icon">📧</span> Subscribers</a></li>
+  </ul>
+
+  <div class="sb-label">Content</div>
+  <ul class="sb-nav">
+    <li><a href="#" onclick="showPanel('editor',this)"><span class="icon">✏️</span> Edit Landing Page</a></li>
+    <li><a href="#" onclick="showPanel('products',this)"><span class="icon">🌸</span> Manage Products</a></li>
+    <li><a href="#" onclick="showPanel('testimonials',this)"><span class="icon">💬</span> Testimonials</a></li>
+  </ul>
+
+  <div class="sb-label">System</div>
+  <ul class="sb-nav">
+    <li><a href="#" onclick="showPanel('settings',this)"><span class="icon">⚙️</span> Settings</a></li>
+  </ul>
+
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar">AD</div>
+      <div>
+        <div class="sb-name">Admin</div>
+        <div class="sb-role">Super Administrator</div>
+      </div>
+    </div>
+    <button class="sb-logout" onclick="doLogout()">⬅ Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">📊 Dashboard Overview</div>
+    <div class="topbar-right">
+      <span style="font-size:0.82rem;color:var(--muted);" id="live-time"></span>
+      <span class="topbar-badge">Live</span>
+      <a href="SheRise_Landing_Page.html" target="_blank" style="font-size:0.82rem;color:var(--plum);font-weight:600;text-decoration:none;">↗ View Site</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD PANEL -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="s-icon">📧</div>
+          <div class="s-label">Total Subscribers</div>
+          <div class="s-val" id="stat-subs">1,284</div>
+          <div class="s-change s-up">▲ 12% this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon">🌸</div>
+          <div class="s-label">Active Products</div>
+          <div class="s-val" id="stat-products">3</div>
+          <div class="s-change" style="color:var(--muted);">Listed on your page</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon">⭐</div>
+          <div class="s-label">Avg. Rating</div>
+          <div class="s-val">4.9</div>
+          <div class="s-change" style="color:var(--muted);">Across all reviews</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-icon">💬</div>
+          <div class="s-label">Testimonials</div>
+          <div class="s-val" id="stat-tests">4</div>
+          <div class="s-change" style="color:var(--muted);">Published on site</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+        <div class="table-wrap">
+          <div class="table-head"><h3>Recent Subscribers</h3><button class="tbl-btn tbl-btn-outline" onclick="showPanel('subscribers',document.querySelector('[onclick*=subscribers]'))">View All</button></div>
+          <table>
+            <thead><tr><th>Email</th><th>Date Joined</th><th>Source</th><th>Status</th></tr></thead>
+            <tbody id="recent-subs-body"></tbody>
+          </table>
+        </div>
+        <div class="table-wrap" style="padding:1.5rem;">
+          <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">Weekly Signups</h3>
+          <p style="font-size:0.8rem;color:var(--muted);">New subscribers per day</p>
+          <div class="mini-chart" id="mini-chart"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:0.4rem;">
+            <span style="font-size:0.7rem;color:var(--muted);">Mon</span>
+            <span style="font-size:0.7rem;color:var(--muted);">Sun</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head"><h3>Recent Subscribers</h3><button class="tbl-btn tbl-btn-outline" onclick="showPanel('subscribers',document.querySelector('[onclick*=subscribers]'))">View All</button></div>
+        <table>
+          <thead><tr><th>Email</th><th>Date Joined</th><th>Source</th><th>Status</th></tr></thead>
+          <tbody id="recent-subs-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUBSCRIBERS PANEL -->
+    <div class="panel" id="panel-subscribers">
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>All Subscribers <span style="color:var(--muted);font-weight:400;font-size:0.85rem;" id="sub-count"></span></h3>
+          <div style="display:flex;gap:0.8rem;">
+            <input id="sub-search" type="text" placeholder="Search email…" style="padding:0.4rem 0.8rem;border:1.5px solid #DDD;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;" oninput="filterSubs()"/>
+            <button class="tbl-btn tbl-btn-solid" onclick="exportCSV('subscribers')">⬇ Export CSV</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Email</th><th>Date Joined</th><th>Source</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="subs-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EDITOR PANEL -->
+    <div class="panel" id="panel-editor">
+      <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1.5rem;">Edit your landing page content below. Click <strong>Save Changes</strong> on each section to update.</p>
+      <div class="editor-grid">
+        <div class="editor-card">
+          <h3>🦸 Hero Section</h3>
+          <div class="field-group"><label>Headline</label><input type="text" id="e-headline" value="You Don't Need a Product. You Need a Solution."/></div>
+          <div class="field-group"><label>Subheadline</label><textarea id="e-sub">SheRise is your all-in-one wellness ecosystem — empowering women to take charge of their health, mental strength, physical power, and complete wellbeing.</textarea></div>
+          <div class="field-group"><label>CTA Button Text</label><input type="text" id="e-cta" value="Explore My Solutions"/></div>
+          <button class="save-btn" onclick="saveSection('hero')">Save Changes</button>
+          <span class="save-toast" id="toast-hero">✓ Saved!</span>
+        </div>
+
+        <div class="editor-card">
+          <h3>📊 Hero Stats</h3>
+          <div class="field-group"><label>Stat 1 — Number</label><input type="text" id="e-s1n" value="12K+"/></div>
+          <div class="field-group"><label>Stat 1 — Label</label><input type="text" id="e-s1l" value="Women Transformed"/></div>
+          <div class="field-group"><label>Stat 2 — Number</label><input type="text" id="e-s2n" value="4.9★"/></div>
+          <div class="field-group"><label>Stat 2 — Label</label><input type="text" id="e-s2l" value="Average Rating"/></div>
+          <div class="field-group"><label>Stat 3 — Number</label><input type="text" id="e-s3n" value="98%"/></div>
+          <div class="field-group"><label>Stat 3 — Label</label><input type="text" id="e-s3l" value="Would Recommend"/></div>
+          <button class="save-btn" onclick="saveSection('stats')">Save Changes</button>
+          <span class="save-toast" id="toast-stats">✓ Saved!</span>
+        </div>
+
+        <div class="editor-card">
+          <h3>📧 Email Capture</h3>
+          <div class="field-group"><label>Section Headline</label><input type="text" id="e-email-h" value="Get Your Free Wellness Starter Guide"/></div>
+          <div class="field-group"><label>Description</label><textarea id="e-email-d">Join 12,000+ women who receive our weekly wellness tips, exclusive offers, and the free 7-Day Female Wellness Reset.</textarea></div>
+          <div class="field-group"><label>Button Text</label><input type="text" id="e-email-btn" value="Get Free Guide"/></div>
+          <div class="field-group"><label>Disclaimer Text</label><input type="text" id="e-email-disc" value="No spam. Unsubscribe at any time."/></div>
+          <button class="save-btn" onclick="saveSection('email')">Save Changes</button>
+          <span class="save-toast" id="toast-email">✓ Saved!</span>
+        </div>
+
+        <div class="editor-card">
+          <h3>🎨 Brand & Colors</h3>
+          <div class="field-group"><label>Brand Name</label><input type="text" id="e-brand" value="SheRise"/></div>
+          <div class="field-group"><label>Primary Color (Deep Plum)</label><input type="color" id="e-col1" value="#3C1A5E" style="height:40px;cursor:pointer;"/></div>
+          <div class="field-group"><label>Accent Gold</label><input type="color" id="e-col2" value="#C9922A" style="height:40px;cursor:pointer;"/></div>
+          <div class="field-group"><label>Rose Accent</label><input type="color" id="e-col3" value="#A63060" style="height:40px;cursor:pointer;"/></div>
+          <button class="save-btn" onclick="saveSection('brand')">Save Changes</button>
+          <span class="save-toast" id="toast-brand">✓ Saved!</span>
+        </div>
+
+        <div class="editor-card" style="grid-column:1/-1;">
+          <h3>🌿 Solutions Section</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+            <div>
+              <div class="field-group"><label>Section Title</label><input type="text" id="e-sol-h" value="Four Pillars of Female Wellness"/></div>
+              <div class="field-group"><label>Section Description</label><textarea id="e-sol-d">Every woman is different. That's why we built four solution paths — each tailored to a different area of your wellbeing journey.</textarea></div>
+            </div>
+            <div>
+              <div class="field-group"><label>Pillar 1 Title</label><input type="text" value="Health & Nutrition"/></div>
+              <div class="field-group"><label>Pillar 2 Title</label><input type="text" value="Mental Health & Mindset"/></div>
+              <div class="field-group"><label>Pillar 3 Title</label><input type="text" value="Strength & Fitness"/></div>
+              <div class="field-group"><label>Pillar 4 Title</label><input type="text" value="Perfect Wellbeing"/></div>
+            </div>
+          </div>
+          <button class="save-btn" onclick="saveSection('solutions')">Save Changes</button>
+          <span class="save-toast" id="toast-solutions">✓ Saved!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS PANEL -->
+    <div class="panel" id="panel-products">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+        <div class="sec-title">Manage Products</div>
+        <button class="tbl-btn tbl-btn-solid" onclick="openAddProduct()">+ Add Product</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Badge</th><th>Affiliate Link</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="products-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TESTIMONIALS PANEL -->
+    <div class="panel" id="panel-testimonials">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+        <div class="sec-title">Manage Testimonials</div>
+        <button class="tbl-btn tbl-btn-solid" onclick="openAddTestimonial()">+ Add Testimonial</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Role</th><th>Quote (preview)</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="test-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div class="panel" id="panel-settings">
+      <div class="settings-grid">
+        <div class="editor-card">
+          <h3>⚙️ Site Settings</h3>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Maintenance Mode</div><div class="toggle-sub">Show a "coming soon" screen to visitors</div></div>
+            <label class="toggle"><input type="checkbox"/><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Show Email Capture</div><div class="toggle-sub">Display free guide signup section</div></div>
+            <label class="toggle"><input type="checkbox" checked/><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Show Testimonials</div><div class="toggle-sub">Display customer stories section</div></div>
+            <label class="toggle"><input type="checkbox" checked/><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Cart Enabled</div><div class="toggle-sub">Allow visitors to add items to cart</div></div>
+            <label class="toggle"><input type="checkbox" checked/><span class="slider-t"></span></label>
+          </div>
+        </div>
+
+        <div class="editor-card">
+          <h3>📬 Email Settings</h3>
+          <div class="field-group"><label>Admin Email</label><input type="email" value="admin@sherise.com"/></div>
+          <div class="field-group"><label>Reply-To Address</label><input type="email" value="hello@sherise.com"/></div>
+          <div class="field-group"><label>Welcome Email Subject</label><input type="text" value="Your Free SheRise Wellness Guide is Here! 🌸"/></div>
+          <button class="save-btn" onclick="saveSection('email-settings')">Save Email Settings</button>
+          <span class="save-toast" id="toast-email-settings">✓ Saved!</span>
+        </div>
+
+        <div class="editor-card">
+          <h3>🔐 Change Password</h3>
+          <div class="field-group"><label>Current Password</label><input type="password" placeholder="Current password"/></div>
+          <div class="field-group"><label>New Password</label><input type="password" placeholder="New password"/></div>
+          <div class="field-group"><label>Confirm New Password</label><input type="password" placeholder="Confirm password"/></div>
+          <button class="save-btn" onclick="saveSection('password')">Update Password</button>
+          <span class="save-toast" id="toast-password">✓ Saved!</span>
+        </div>
+
+        <div class="editor-card">
+          <h3>🗄️ Database Info</h3>
+          <div style="background:#F8F5FC;border-radius:8px;padding:1rem;font-size:0.82rem;line-height:2;color:var(--deep);">
+            <div><strong>Host:</strong> localhost</div>
+            <div><strong>Database:</strong> sherise_db</div>
+            <div><strong>Tables:</strong> subscribers, orders, products, testimonials, content</div>
+            <div><strong>Backend:</strong> sherise_backend.php</div>
+          </div>
+          <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem;">Connect your MySQL server by editing <code>sherise_backend.php</code> with your credentials.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ADD PRODUCT MODAL -->
+<div class="modal-bg" id="product-modal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('product-modal')">✕</button>
+    <h3 id="product-modal-title">Add New Product</h3>
+    <div class="field-group"><label>Product Name</label><input type="text" id="pm-name" placeholder="e.g. Hormone Balance Bundle"/></div>
+    <div class="field-group"><label>Category</label>
+      <select id="pm-cat">
+        <option>Health & Nutrition</option>
+        <option>Mental Health & Mindset</option>
+        <option>Strength & Fitness</option>
+        <option>Perfect Wellbeing</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field-group"><label>Price ($)</label><input type="number" id="pm-price" placeholder="49"/></div>
+      <div class="field-group"><label>Badge (optional)</label><input type="text" id="pm-badge" placeholder="Best Seller"/></div>
+    </div>
+    <div class="field-group"><label>Description</label><textarea id="pm-desc" placeholder="Short product description…"></textarea></div>
+
+    <!-- IMAGE UPLOAD -->
+    <div class="field-group">
+      <label>Product Image</label>
+      <div id="pm-img-preview" style="
+        width:100%;height:140px;border-radius:10px;border:2px dashed #DDD;
+        display:flex;align-items:center;justify-content:center;
+        background:#F8F5FC;cursor:pointer;overflow:hidden;position:relative;
+        margin-bottom:0.5rem;transition:border-color 0.2s;
+      " onclick="document.getElementById('pm-img-input').click()">
+        <span id="pm-img-placeholder" style="font-size:0.85rem;color:var(--muted);text-align:center;">
+          📸<br/>Click to upload image<br/><span style="font-size:0.75rem;">JPG, PNG or WebP · Max 5MB</span>
+        </span>
+        <img id="pm-img-thumb" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>
+      </div>
+      <input type="file" id="pm-img-input" accept="image/*" style="display:none;" onchange="handleImgUpload(event)"/>
+      <input type="text" id="pm-img-url" placeholder="Or paste an image URL…" style="font-size:0.82rem;" oninput="handleImgUrl(this.value)"/>
+    </div>
+
+    <!-- AFFILIATE LINK -->
+    <div class="field-group">
+      <label>Affiliate / Product Link</label>
+      <input type="url" id="pm-link" placeholder="https://partner-site.com/product-page"/>
+      <p style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem;">This is where the "Shop Now" button on your landing page will send visitors.</p>
+    </div>
+
+    <!-- SLOT (which product card on landing page) -->
+    <div class="field-group">
+      <label>Landing Page Slot</label>
+      <select id="pm-slot">
+        <option value="1">Product Card 1 (Health)</option>
+        <option value="2">Product Card 2 (Mental)</option>
+        <option value="3">Product Card 3 (Strength)</option>
+      </select>
+      <p style="font-size:0.75rem;color:var(--muted);margin-top:0.4rem;">Which product card on your landing page should this update?</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('product-modal')">Cancel</button>
+      <button class="btn-confirm" onclick="saveProduct()">Save & Apply to Site</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TESTIMONIAL MODAL -->
+<div class="modal-bg" id="test-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('test-modal')">✕</button>
+    <h3>Add Testimonial</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field-group"><label>Name</label><input type="text" id="tm-name" placeholder="Jane Doe"/></div>
+      <div class="field-group"><label>Role / Description</label><input type="text" id="tm-role" placeholder="Mum of 2 · 6 months"/></div>
+    </div>
+    <div class="field-group"><label>Quote</label><textarea id="tm-quote" placeholder="What did they say…"></textarea></div>
+    <div class="field-group"><label>Rating</label>
+      <select id="tm-rating"><option>5</option><option>4</option><option>3</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('test-modal')">Cancel</button>
+      <button class="btn-confirm" onclick="saveTestimonial()">Save Testimonial</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── AUTH ──
+const ADMIN_USER = 'admin', ADMIN_PASS = 'sherise2025';
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value.trim();
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    document.getElementById('login-overlay').style.display='none';
+    initDashboard();
+  } else {
+    document.getElementById('login-err').style.display='block';
+    setTimeout(()=>document.getElementById('login-err').style.display='none',2000);
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogout(){document.getElementById('login-overlay').style.display='flex';}
+
+// ── DATA ──
+let subscribers=[
+  {email:'amara.m@gmail.com',date:'2025-05-20',source:'Landing Page',status:'active'},
+  {email:'sofia.l@yahoo.com',date:'2025-05-19',source:'Social Media',status:'active'},
+  {email:'nadia.k@outlook.com',date:'2025-05-18',source:'Landing Page',status:'active'},
+  {email:'joy.b@gmail.com',date:'2025-05-17',source:'Referral',status:'active'},
+  {email:'grace.o@gmail.com',date:'2025-05-16',source:'Landing Page',status:'unsubscribed'},
+  {email:'chioma.e@mail.com',date:'2025-05-15',source:'Social Media',status:'active'},
+  {email:'fatima.y@gmail.com',date:'2025-05-14',source:'Landing Page',status:'active'},
+  {email:'linda.a@yahoo.com',date:'2025-05-13',source:'Referral',status:'active'},
+];
+
+let products=[
+  {name:'Hormone Balance Bundle',cat:'Health & Nutrition',price:49,badge:'Best Seller',status:'active'},
+  {name:'Calm & Clarity Program',cat:'Mental Health & Mindset',price:39,badge:'New',status:'active'},
+  {name:'Cycle-Sync Training Kit',cat:'Strength & Fitness',price:74,badge:'',status:'active'},
+];
+
+let testimonials=[
+  {name:'Amara M.',role:'Mum of 2 · 6 months',quote:'I finally feel like myself again.',rating:5,status:'published'},
+  {name:'Sofia L.',role:'Entrepreneur',quote:'Within two weeks I noticed a shift.',rating:5,status:'published'},
+  {name:'Nadia K.',role:'Fitness Coach',quote:'I\'m stronger than I\'ve ever been.',rating:5,status:'published'},
+  {name:'Joy B.',role:'Teacher',quote:'I\'ve never felt so supported.',rating:5,status:'draft'},
+];
+
+// ── NAVIGATION ──
+function showPanel(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  const titles={dashboard:'📊 Dashboard Overview',subscribers:'📧 Subscribers',editor:'✏️ Edit Landing Page',products:'🌸 Manage Products',testimonials:'💬 Testimonials',settings:'⚙️ Settings'};
+  document.getElementById('topbar-title').textContent = titles[id]||id;
+  renderPanel(id);
+  return false;
+}
+
+// ── RENDER ──
+function renderPanel(id){
+  if(id==='dashboard') renderDashboard();
+  if(id==='subscribers') renderSubs();
+  if(id==='products') renderProducts();
+  if(id==='testimonials') renderTestimonials();
+}
+
+function statusBadge(s){
+  const map={active:'badge-green',completed:'badge-green',published:'badge-green',processing:'badge-gold',draft:'badge-gray',unsubscribed:'badge-gray',refunded:'badge-rose'};
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+
+function renderDashboard(){
+  document.getElementById('stat-subs').textContent = subscribers.filter(s=>s.status==='active').length.toLocaleString();
+  document.getElementById('stat-products').textContent = products.filter(p=>p.status==='active').length;
+  document.getElementById('stat-tests').textContent = testimonials.filter(t=>t.status==='published').length;
+
+  const rsb = document.getElementById('recent-subs-body');
+  rsb.innerHTML = subscribers.slice(0,5).map(s=>`<tr>
+    <td>${s.email}</td><td>${s.date}</td><td>${s.source}</td><td>${statusBadge(s.status)}</td>
+  </tr>`).join('');
+
+  const chart = document.getElementById('mini-chart');
+  const vals=[8,14,6,21,18,25,12];
+  const max=Math.max(...vals);
+  chart.innerHTML = vals.map(v=>`<div class="bar" style="height:${Math.round(v/max*100)}%"></div>`).join('');
+}
+
+function renderSubs(){
+  document.getElementById('sub-count').textContent = `(${subscribers.length} total)`;
+  const body = document.getElementById('subs-body');
+  body.innerHTML = subscribers.map((s,i)=>`<tr>
+    <td>${s.email}</td><td>${s.date}</td><td>${s.source}</td><td>${statusBadge(s.status)}</td>
+    <td>
+      <button class="action-btn" title="Toggle status" onclick="toggleSub(${i})">🔄</button>
+      <button class="action-btn" title="Delete" onclick="deleteSub(${i})">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+
+function filterSubs(){
+  const q=document.getElementById('sub-search').value.toLowerCase();
+  const rows=document.getElementById('subs-body').querySelectorAll('tr');
+  rows.forEach(r=>{r.style.display=r.innerText.toLowerCase().includes(q)?'':'none';});
+}
+
+function toggleSub(i){
+  subscribers[i].status = subscribers[i].status==='active'?'unsubscribed':'active';
+  renderSubs();
+}
+function deleteSub(i){ if(confirm('Delete this subscriber?')){ subscribers.splice(i,1); renderSubs(); } }
+
+function renderOrders(){
+  document.getElementById('ord-count').textContent = `(${orders.length} total)`;
+  document.getElementById('orders-body').innerHTML = orders.map((o,i)=>`<tr>
+    <td style="font-weight:600;color:var(--plum);">${o.id}</td>
+    <td>${o.customer}</td><td>${o.product}</td>
+    <td style="font-weight:600;">$${o.amount}</td>
+    <td>${o.date}</td><td>${statusBadge(o.status)}</td>
+    <td>
+      <button class="action-btn" onclick="cycleOrder(${i})">🔄</button>
+      <button class="action-btn" onclick="deleteOrder(${i})">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+function cycleOrder(i){
+  const cycle=['processing','completed','refunded'];
+  const cur=cycle.indexOf(orders[i].status);
+  orders[i].status=cycle[(cur+1)%cycle.length];
+  renderOrders();
+}
+function deleteOrder(i){ if(confirm('Delete this order?')){ orders.splice(i,1); renderOrders(); } }
+
+function renderProducts(){
+  document.getElementById('products-body').innerHTML = products.map((p,i)=>`<tr>
+    <td style="display:flex;align-items:center;gap:0.8rem;">
+      ${p.image ? `<img src="${p.image}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;" alt=""/>` : '<div style="width:40px;height:40px;border-radius:8px;background:#F0EBF5;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">📦</div>'}
+      <span style="font-weight:600;">${p.name}</span>
+    </td>
+    <td>${p.cat}</td>
+    <td>$${p.price}</td>
+    <td>${p.badge?`<span class="badge badge-rose">${p.badge}</span>`:'-'}</td>
+    <td>${p.link ? `<a href="${p.link}" target="_blank" style="color:var(--plum);font-size:0.8rem;font-weight:600;text-decoration:none;">↗ View Link</a>` : '<span style="color:var(--muted);font-size:0.8rem;">No link set</span>'}</td>
+    <td>${statusBadge(p.status)}</td>
+    <td>
+      <button class="action-btn" onclick="editProduct(${i})">✏️</button>
+      <button class="action-btn" onclick="deleteProduct(${i})">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+
+function showAdminToast(msg) {
+  let t = document.getElementById('admin-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'admin-toast';
+    t.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:var(--deep);color:white;padding:1rem 1.5rem;border-radius:12px;font-size:0.88rem;font-weight:500;border:1px solid rgba(201,146,42,0.4);z-index:9999;transition:all 0.3s;box-shadow:0 8px 24px rgba(0,0,0,0.3);';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px)'; }, 3500);
+}
+function deleteProduct(i){ if(confirm('Delete this product?')){ products.splice(i,1); renderProducts(); } }
+
+function renderTestimonials(){
+  document.getElementById('test-body').innerHTML = testimonials.map((t,i)=>`<tr>
+    <td style="font-weight:600;">${t.name}</td><td>${t.role}</td>
+    <td style="color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"${t.quote}"</td>
+    <td>${'★'.repeat(t.rating)}</td>
+    <td>${statusBadge(t.status)}</td>
+    <td>
+      <button class="action-btn" onclick="toggleTest(${i})">🔄</button>
+      <button class="action-btn" onclick="deleteTest(${i})">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+function toggleTest(i){testimonials[i].status=testimonials[i].status==='published'?'draft':'published';renderTestimonials();}
+function deleteTest(i){if(confirm('Delete?')){testimonials.splice(i,1);renderTestimonials();}}
+
+// ── MODALS ──
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+let editingProductIdx = null;
+let currentImgData = ''; // base64 or URL
+
+function handleImgUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentImgData = e.target.result;
+    showImgPreview(currentImgData);
+    document.getElementById('pm-img-url').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleImgUrl(url) {
+  if (url.trim()) {
+    currentImgData = url.trim();
+    showImgPreview(currentImgData);
+  } else {
+    clearImgPreview();
+  }
+}
+
+function showImgPreview(src) {
+  document.getElementById('pm-img-thumb').src = src;
+  document.getElementById('pm-img-thumb').style.display = 'block';
+  document.getElementById('pm-img-placeholder').style.display = 'none';
+  document.getElementById('pm-img-preview').style.borderColor = 'var(--plum)';
+}
+
+function clearImgPreview() {
+  currentImgData = '';
+  document.getElementById('pm-img-thumb').src = '';
+  document.getElementById('pm-img-thumb').style.display = 'none';
+  document.getElementById('pm-img-placeholder').style.display = 'block';
+  document.getElementById('pm-img-preview').style.borderColor = '#DDD';
+  document.getElementById('pm-img-url').value = '';
+  document.getElementById('pm-img-input').value = '';
+}
+
+function openAddProduct() {
+  editingProductIdx = null;
+  currentImgData = '';
+  document.getElementById('product-modal-title').textContent = 'Add New Product';
+  ['pm-name','pm-price','pm-badge','pm-desc','pm-link','pm-img-url'].forEach(id => document.getElementById(id).value = '');
+  clearImgPreview();
+  openModal('product-modal');
+}
+
+function editProduct(i) {
+  editingProductIdx = i;
+  const p = products[i];
+  document.getElementById('product-modal-title').textContent = 'Edit Product';
+  document.getElementById('pm-name').value  = p.name;
+  document.getElementById('pm-price').value = p.price;
+  document.getElementById('pm-badge').value = p.badge || '';
+  document.getElementById('pm-desc').value  = p.desc  || '';
+  document.getElementById('pm-link').value  = p.link  || '';
+  document.getElementById('pm-slot').value  = p.slot  || '1';
+  currentImgData = p.image || '';
+  if (currentImgData) { showImgPreview(currentImgData); document.getElementById('pm-img-url').value = currentImgData.startsWith('data:') ? '' : currentImgData; }
+  else clearImgPreview();
+  openModal('product-modal');
+}
+
+function saveProduct() {
+  const name  = document.getElementById('pm-name').value.trim();
+  if (!name) { alert('Please enter a product name'); return; }
+  const link  = document.getElementById('pm-link').value.trim();
+  const slot  = document.getElementById('pm-slot').value;
+
+  const obj = {
+    name, cat: document.getElementById('pm-cat').value,
+    price: Number(document.getElementById('pm-price').value),
+    badge: document.getElementById('pm-badge').value,
+    desc:  document.getElementById('pm-desc').value,
+    link, image: currentImgData, slot, status: 'active'
+  };
+
+  if (editingProductIdx !== null) products[editingProductIdx] = obj;
+  else products.push(obj);
+
+  // Save image & link to localStorage so landing page picks them up
+  try {
+    localStorage.setItem('sherise_product_' + slot, JSON.stringify({ image: currentImgData, link }));
+  } catch(e) { console.warn('localStorage not available in this context'); }
+
+  closeModal('product-modal');
+  renderProducts();
+  showAdminToast('✓ Product saved! Image and link are now live on the landing page.');
+}
+function openAddTestimonial(){ ['tm-name','tm-role','tm-quote'].forEach(id=>document.getElementById(id).value=''); openModal('test-modal'); }
+function saveTestimonial(){
+  testimonials.push({name:document.getElementById('tm-name').value,role:document.getElementById('tm-role').value,quote:document.getElementById('tm-quote').value,rating:Number(document.getElementById('tm-rating').value),status:'draft'});
+  closeModal('test-modal'); renderTestimonials();
+}
+
+// ── SAVE SECTIONS ──
+function saveSection(key){
+  const toastEl = document.getElementById('toast-'+key);
+  if(toastEl){ toastEl.style.opacity='1'; setTimeout(()=>toastEl.style.opacity='0',2000); }
+  // In production: POST to sherise_backend.php?action=save_content with JSON body
+  console.log('Saving section to backend:', key);
+}
+
+// ── EXPORT CSV ──
+function exportCSV(type){
+  const headers=['Email','Date','Source','Status'];
+  const rows=subscribers.map(s=>[s.email,s.date,s.source,s.status]);
+  const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='subscribers.csv'; a.click();
+}
+
+// ── LIVE CLOCK ──
+function updateClock(){ document.getElementById('live-time').textContent=new Date().toLocaleTimeString(); }
+setInterval(updateClock,1000); updateClock();
+
+// ── INIT ──
+function initDashboard(){ renderDashboard(); }
+</script>
+</body>
+</html>
